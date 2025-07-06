@@ -16,10 +16,13 @@ Someday maybe ;)
 #### Using APT
 
 ```bash
-sudo apt update && sudo apt install vim git build-essential sl fortune cowsay lolcat lutris 
+sudo apt update && sudo apt install vim git build-essential sl fortune cowsay lolcat lutris python3-venv podman
 ```
 The most obvious list of apps I need, most of all is Vim and Git.
 Some fun, the kids love `sl` and the coloring of `lolcat`. For simple gaming I use Lutris, it makes it very easy to access my GoG library.
+Python programming uses Virtual Environments so python3-venv needs it's spot in this list.
+I do not need to run everything on my Homelab so for local containers I like to use Podman. The Podman CLI commands are very similar to Docker so I find it very easy to use.
+
 I install the Kubernetes CLI and Helm via Homebrew. Which takes us to the next phase:
 
 #### Using Homebrew
