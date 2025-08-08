@@ -53,7 +53,7 @@ helm install metallb bitnami/metallb -f metallb-values.yaml --namespace kube-sys
 After a few seconds, you should observe the MetalLB components deployed under kube-system namespace.
 
 ```
-$ kubectl get pods -n kube-system -l app=metallb -o wide
+$ kubectl get pods -n kube-system -l app.kubernetes.io/name=metallb -o wide
 
 NAMESPACE     NAME                                      READY   STATUS    RESTARTS   AGE     IP             NODE           NOMINATED NODE   READINESS GATES
 kube-system   metallb-speaker-s7cvp                     1/1     Running   0          2m47s   192.168.0.22   kube-master    <none>           <none>
