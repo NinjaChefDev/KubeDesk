@@ -1,0 +1,76 @@
+prometheus:
+  prometheusSpec:
+    # use Helm’s ServiceMonitor selector logic
+    serviceMonitorSelectorNilUsesHelmValues: false
+
+    # how long to keep raw samples
+    retention: 7d
+
+    # configure persistent storage
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 20Gi
+
+alertmanager:
+  alertmanagerSpec:
+    # configure persistent storage
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 5Gi
+
+grafana:
+  persistence:
+    enabled: true
+    storageClassName: local-path
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+
+  # credentials for Grafana UI
+  adminUser: admin
+  adminPassword: smooth-operator
+
+  # expose the service
+  service:
+    type: LoadBalancer
+    # do NOT set loadBalancerIP - MetalLB auto-allocates from its pool
+
+  ingress:
+    enabled: false
+
+# Optional: tweak resource requests/limits for a small k3s setup
+resources:
+  prometheus:
+    requests:
+      cpu: 200m
+      memory: 400Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+  alertmanager:
+    requests:
+      cpu: 100m
+      memory: 200Mi
+    limits:
+      cpu: 300m
+      memory: 500Mi
+  grafana:
+    requests:
+      cpu: 100m
+      memory: 200Mi
+    limits:
+      cpu: 300m
+      memory: 500Mi
+
