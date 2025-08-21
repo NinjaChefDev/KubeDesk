@@ -22,33 +22,36 @@ And restart the k3s service when ready.
 To install MetalLB from Helm, you simply need to run the following command helm install ... with:
 
 metallb: the name to give to the deployment.
-bitnami/metallb: the name of the chart in the bitnami repo. (More on adding the bitnami repo later.)
+metallb/metallb: the name of the chart in the repo. (More on adding the repo later.)
 namespace kube-system: the namespace in which we want to deploy MetalLB.
 
-It is best practice to use a custom values file for any configuration. This way, it is easy to update the deployment.
+Configuring MetalLB is done with configs. Below are mine. Make sure the files target the same namespace as the deployment.
 ```yaml
-// filename: metallb-values.yaml
-configInline:
-  address-pools:
-   - name: default
-     protocol: layer2
-     addresses:
-     - 192.168.0.240-192.168.240.250
+# metallb-config.yaml
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: lb-addresses
+  namespace: kube-system # adjust to your preference
+spec:
+  addresses:
+    - 192.168.50.240-192.168.50.250
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: lb-addresses
+  namespace: kube-system
+spec:
+  ipAddressPools:
+    - lb-addresses
 ```
 
-Or, you could do the same via Command-line, by passing in the arguments via `--set` followed by the YAML object to want to set.
-For the above example:
-```bash
-  --set configInline.address-pools[0].name=default \
-  --set configInline.address-pools[0].protocol=layer2 \
-  --set configInline.address-pools[0].addresses[0]=192.168.0.240-192.168.0.250
-```
-
-In both cases I configures MetalLB in Layer 2 mode (see documentation for more details). The IPs range 192.168.0.240-192.168.0.250 is used to constitute a pool of virtual IP addresses.
+In above YAML file I configures MetalLB in Layer 2 mode (see documentation for more details). The IPs range 192.168.50.240-192.168.50.250 is used to constitute a pool of virtual IP addresses.
 
 ```bash
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm install metallb bitnami/metallb -f metallb-values.yaml --namespace kube-system 
+helm repo add metallb https://metallb.github.io/metallb
+helm install metallb metallb/metallb
 ```
 After a few seconds, you should observe the MetalLB components deployed under kube-system namespace.
 
@@ -62,6 +65,16 @@ kube-system   metallb-controller-6fb88ff94b-4g256       1/1     Running   0     
 kube-system   metallb-speaker-k5kbh                     1/1     Running   0          2m47s   192.168.0.24   kube-worker2   <none>           <none>
 ```
 
-All done. Now every time a new Kubenertes service of type LoadBalancer is deployed, MetalLB will assign an IP from the pool to access the application.
+Now apply the config file:
+```bash
+kubectl apply -f metallb-config.yaml
+```
 
+If you are like me, and apply the config YAML within seconds of deployment, you could see this error:
+```bash
+Error from server (InternalError): error when creating "metallb-config.yaml": Internal error occurred: failed calling webhook "ipaddresspoolvalidationwebhook.metallb.io": failed to call webhook: Post "https://metallb-webhook-service.kube-system.svc:443/validate-metallb-io-v1beta1-ipaddresspool?timeout=10s": no endpoints available for service "metallb-webhook-service"
+```
+Just grab a coffee, come back and run the command again.
+
+All done. Now every time a new Kubenertes service of type LoadBalancer is deployed, MetalLB will assign an IP from the pool to access the application.
 
