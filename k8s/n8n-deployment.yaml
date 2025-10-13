@@ -53,7 +53,11 @@ spec:
               value: http
             - name: N8N_PORT
               value: "5678"
-          image: n8nio/n8n:1.109.2
+            - name: N8N_HOST
+              value: n8n.local
+            - name: N8N_SECURE_COOKIE
+              value: "false"
+          image: docker.n8n.io/n8nio/n8n:1.109.1
           name: n8n
           ports:
             - containerPort: 5678
